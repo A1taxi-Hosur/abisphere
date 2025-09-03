@@ -32,6 +32,16 @@ export class DatabaseService {
     }
     
     try {
+      // Check if table exists first
+      const { error: tableError } = await this.supabase
+        .from('suppliers')
+        .select('count', { count: 'exact', head: true });
+      
+      if (tableError && tableError.code === 'PGRST205') {
+        console.warn('Suppliers table does not exist yet. Please run database migrations.');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('suppliers')
         .select('*')
@@ -336,6 +346,16 @@ export class DatabaseService {
     }
     
     try {
+      // Check if table exists first
+      const { error: tableError } = await this.supabase
+        .from('delivery_confirmations')
+        .select('count', { count: 'exact', head: true });
+      
+      if (tableError && tableError.code === 'PGRST205') {
+        console.warn('Delivery confirmations table does not exist yet. Please run database migrations.');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('delivery_confirmations')
         .select('*')
@@ -399,6 +419,16 @@ export class DatabaseService {
     }
     
     try {
+      // Check if table exists first
+      const { error: tableError } = await this.supabase
+        .from('staff_members')
+        .select('count', { count: 'exact', head: true });
+      
+      if (tableError && tableError.code === 'PGRST205') {
+        console.warn('Staff members table does not exist yet. Please run database migrations.');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('staff_members')
         .select('*')
@@ -696,6 +726,16 @@ export class DatabaseService {
     }
     
     try {
+      // Check if table exists first
+      const { error: tableError } = await this.supabase
+        .from('customers')
+        .select('count', { count: 'exact', head: true });
+      
+      if (tableError && tableError.code === 'PGRST205') {
+        console.warn('Customers table does not exist yet. Please run database migrations.');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('customers')
         .select('*')
@@ -719,6 +759,16 @@ export class DatabaseService {
     }
     
     try {
+      // Check if table exists first
+      const { error: tableError } = await this.supabase
+        .from('purchase_orders')
+        .select('count', { count: 'exact', head: true });
+      
+      if (tableError && tableError.code === 'PGRST205') {
+        console.warn('Purchase orders table does not exist yet. Please run database migrations.');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('purchase_orders')
         .select('*')
