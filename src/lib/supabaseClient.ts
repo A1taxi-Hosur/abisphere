@@ -140,11 +140,11 @@ export class DatabaseService {
   }
 
   static async addInventoryItem(item: any) {
-    if (!supabase) {
+    if (!supabaseAdmin) {
       throw new Error('Database not configured');
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('inventory_items')
       .insert([item])
       .select()
@@ -207,11 +207,11 @@ export class DatabaseService {
   }
 
   static async addStockMovement(movement: any) {
-    if (!supabase) {
+    if (!supabaseAdmin) {
       throw new Error('Database not configured');
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('stock_movements')
       .insert([movement])
       .select()
@@ -245,11 +245,11 @@ export class DatabaseService {
   }
 
   static async addRecipe(recipe: any) {
-    if (!supabase) {
+    if (!supabaseAdmin) {
       throw new Error('Database not configured');
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('recipes')
       .insert([recipe])
       .select()
@@ -312,11 +312,11 @@ export class DatabaseService {
   }
 
   static async addOrder(order: any) {
-    if (!supabase) {
+    if (!supabaseAdmin) {
       throw new Error('Database not configured');
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('orders')
       .insert([order])
       .select('*, order_number')
@@ -376,13 +376,13 @@ export class DatabaseService {
   }
 
   static async addDeliveryConfirmation(confirmation: any) {
-    if (!supabase) {
+    if (!supabaseAdmin) {
       throw new Error('Database not configured');
     }
     
     console.log('Adding delivery confirmation to database:', confirmation);
     
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('delivery_confirmations')
       .insert([confirmation])
       .select()
@@ -449,12 +449,12 @@ export class DatabaseService {
   }
 
   static async addStaffMember(user: any) {
-    if (!supabase) {
+    if (!supabaseAdmin) {
       throw new Error('Database not configured');
     }
     
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('staff_members')
         .insert([user])
         .select()
@@ -507,11 +507,11 @@ export class DatabaseService {
 
   // Update customers to use proper database operations
   static async addCustomer(customer: any) {
-    if (!supabase) {
+    if (!supabaseAdmin) {
       throw new Error('Database not configured');
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('customers')
       .insert([customer])
       .select()
@@ -789,11 +789,11 @@ export class DatabaseService {
   }
 
   static async addPurchaseOrder(purchaseOrder: any) {
-    if (!supabase) {
+    if (!supabaseAdmin) {
       throw new Error('Database not configured');
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('purchase_orders')
       .insert([purchaseOrder])
       .select()
