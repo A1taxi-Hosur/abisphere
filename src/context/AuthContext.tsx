@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { DatabaseService } from '../lib/supabaseClient';
-
+import { getToken, clearToken } from '../lib/token';
 interface AuthContextType {
   user: any;
   loginWithUsername: (username: string, password: string, role: string) => Promise<boolean>;
