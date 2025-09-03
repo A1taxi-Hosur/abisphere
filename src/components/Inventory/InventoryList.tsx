@@ -92,18 +92,41 @@ export function InventoryList() {
   };
 
   const handleAddItem = () => {
-    // More specific validation
-    const missingFields = [];
-    if (!newItem.name.trim()) missingFields.push('Item Name');
-    if (!newItem.unit.trim()) missingFields.push('Unit');
-    if (!newItem.supplier.trim()) missingFields.push('Supplier');
-    
-    if (missingFields.length > 0) {
-      alert(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+    if (!newItem.name.trim() || !newItem.unit.trim() || !newItem.supplier.trim()) {
+      alert('Please fill in all required fields');
       return;
     }
 
-    addInventoryItem(newItem);
+    // Direct database insert
+    const itemData = {
+      name: newItem.name.trim(),
+      category: newItem.category,
+      current_stock: newItem.currentStock,
+      unit: newItem.unit.trim(),
+      min_stock: newItem.minStock,
+      max_stock: newItem.maxStock,
+      cost_per_unit: newItem.costPerUnit,
+      supplier: newItem.supplier.trim(),
+      last_restocked: newItem.lastRestocked,
+      expiry_date: newItem.expiryDate || null
+    };
+
+    // Add directly to database
+    if (supabase) {
+      supabase.from('inventory_items').insert([itemData]).then(({ data, error }) => {
+        if (error) {
+          console.error('Error adding item:', error);
+          alert('Error adding item: ' + error.message);
+        } else {
+          alert('✅ Item added successfully!');
+          // Refresh the page to show new item
+          window.location.reload();
+        }
+      });
+    } else {
+      alert('Database not connected');
+    }
+
     setNewItem({
       name: '',
       category: 'vegetables',
