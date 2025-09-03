@@ -3,6 +3,7 @@ import { Database } from './database.types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('⚠️ Supabase environment variables not configured.');
@@ -14,7 +15,9 @@ export const supabase = supabaseUrl && supabaseAnonKey
   ? createClient<Database>(supabaseUrl, supabaseAnonKey)
   : null;
 
-export const supabaseAdmin = supabase;
+export const supabaseAdmin = supabaseUrl && supabaseServiceKey
+  ? createClient<Database>(supabaseUrl, supabaseServiceKey)
+  : supabase;
 
 export class DatabaseService {
   static supabase = supabase;
@@ -59,12 +62,12 @@ export class DatabaseService {
   }
 
   static async addSupplier(supplier: any) {
-    if (!supabase) {
+    if (!supabaseAdmin) {
       throw new Error('Database not configured');
     }
     
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAdmin
         .from('suppliers')
         .insert([supplier])
         .select();
@@ -572,12 +575,12 @@ export class DatabaseService {
   }
 
   static async addPurchase(purchase: any) {
-    if (!supabase) {
+    if (!supabaseAdmin) {
       throw new Error('Database not configured');
     }
     
     // Check if purchases table exists
-    const { error: tableCheckError } = await supabase
+    const { error: tableCheckError } = await supabaseAdmin
       .from('purchases')
       .select('id')
       .limit(1);
@@ -586,7 +589,7 @@ export class DatabaseService {
       throw new Error('Purchases table does not exist. Please apply the database migration first.');
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('purchases')
       .insert([purchase])
       .select(`
@@ -666,12 +669,12 @@ export class DatabaseService {
   }
 
   static async addSale(sale: any) {
-    if (!supabase) {
+    if (!supabaseAdmin) {
       throw new Error('Database not configured');
     }
     
     // Check if sales table exists
-    const { error: tableCheckError } = await supabase
+    const { error: tableCheckError } = await supabaseAdmin
       .from('sales')
       .select('id')
       .limit(1);
@@ -680,7 +683,7 @@ export class DatabaseService {
       throw new Error('Sales table does not exist. Please apply the database migration first.');
     }
     
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('sales')
       .insert([sale])
       .select()
