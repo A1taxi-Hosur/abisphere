@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DollarSign, Plus, Search, Filter, Edit2, Trash2, Calendar, Package, TrendingUp, TrendingDown, Download, X, Save } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabaseClient';
 
 export function PurchaseSalesManagement() {
   const { purchases, sales, suppliers, addPurchase, addSale, updatePurchase, updateSale, deletePurchase, deleteSale, loading, error } = useApp();

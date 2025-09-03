@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Package, Plus, Search, Filter, Edit2, AlertTriangle, X, TrendingUp, TrendingDown, History, Eye, Trash2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabaseClient';
 import { StockMovementModal } from './StockMovementModal';
 import { StockMovementHistory } from './StockMovementHistory';
 
