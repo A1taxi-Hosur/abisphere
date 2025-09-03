@@ -64,9 +64,7 @@ async function runMigrations() {
   }
 }
 
-// Run migrations if this file is executed directly
-if (require.main === module) {
-  runMigrations();
-}
+// Run migrations
+runMigrations();
 
 export { runMigrations };
