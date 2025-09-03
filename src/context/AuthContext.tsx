@@ -22,12 +22,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   useEffect(() => {
     const savedUser = localStorage.getItem('currentUser');
+    const savedToken = localStorage.getItem('supabase_token');
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+        
+        // Set Supabase session if token exists
+        if (savedToken && DatabaseService.supabase) {
+          DatabaseService.supabase.auth.setSession({
+            access_token: savedToken,
+            refresh_token: savedToken,
+            expires_in: 3600,
+            expires_at: Date.now() + 3600000,
+            token_type: 'bearer',
+            user: {
+              id: userData.id,
+              email: userData.email,
+              user_metadata: { name: userData.name, role: userData.role }
+            }
+          });
+        }
       } catch (error) {
         console.error('Error parsing saved user:', error);
         localStorage.removeItem('currentUser');
+        localStorage.removeItem('supabase_token');
       }
     }
   }, []);
@@ -222,8 +241,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
 
       console.log('✅ Authentication successful! Setting user:', authenticatedUser);
+      
+      // Create a mock JWT token for Supabase authentication
+      const mockToken = btoa(JSON.stringify({
+        sub: authenticatedUser.id,
+        email: authenticatedUser.email,
+        role: authenticatedUser.role,
+        exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+      }));
+      
+      // Set Supabase session to pass RLS policies
+      if (DatabaseService.supabase) {
+        try {
+          await DatabaseService.supabase.auth.setSession({
+            access_token: mockToken,
+            refresh_token: mockToken,
+            expires_in: 3600,
+            expires_at: Date.now() + 3600000,
+            token_type: 'bearer',
+            user: {
+              id: authenticatedUser.id,
+              email: authenticatedUser.email,
+              user_metadata: { 
+                name: authenticatedUser.name, 
+                role: authenticatedUser.role 
+              }
+            }
+          });
+          console.log('✅ Supabase session set successfully');
+        } catch (sessionError) {
+          console.warn('⚠️ Could not set Supabase session:', sessionError);
+        }
+      }
+      
       setUser(authenticatedUser);
       localStorage.setItem('currentUser', JSON.stringify(authenticatedUser));
+      localStorage.setItem('supabase_token', mockToken);
 
       return true;
       
@@ -236,8 +289,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const logout = () => {
+    // Clear Supabase session
+    if (DatabaseService.supabase) {
+      DatabaseService.supabase.auth.signOut().catch(console.warn);
+    }
+    
     setUser(null);
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('supabase_token');
     console.log('👋 User logged out');
   };
 
