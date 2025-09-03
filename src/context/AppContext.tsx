@@ -309,7 +309,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         loadPurchaseOrdersData(),
         loadStockMovementsData(),
         loadDeliveryConfirmationsData(),
-        loadStaffMembersData()
+        loadStaffMembersData(),
         loadPurchasesData(),
         loadSalesData()
       ]);
