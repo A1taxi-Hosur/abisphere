@@ -300,7 +300,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     try {
       // Load all data from database - throw errors if any fail
-      await Promise.all([
+      const results = await Promise.allSettled([
         loadSuppliersData(),
         loadInventoryData(), 
         loadRecipesData(),
@@ -313,6 +313,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         loadPurchasesData(),
         loadSalesData()
       ]);
+      
+      // Log any rejected promises but don't crash the app
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          const dataTypes = ['suppliers', 'inventory', 'orders', 'recipes', 'customers', 'purchase_orders', 'delivery_confirmations', 'staff_members', 'stock_movements', 'purchases', 'sales'];
+          console.warn(`Failed to load ${dataTypes[index]}:`, result.reason);
+        }
+      });
       
       console.log('✅ All data loaded from database successfully');
     } catch (error) {
@@ -332,7 +340,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('Error loading data:', err);
       setError('Failed to load data from database');
-      loadMockData();
+      console.warn('Some data failed to load. This may be due to missing database tables. Please run database migrations.');
     } finally {
       setLoading(false);
     }
