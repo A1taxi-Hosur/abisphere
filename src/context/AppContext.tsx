@@ -415,30 +415,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     if (!DatabaseService.isConnected()) {
       throw new Error('Supabase not configured. Please click "Connect to Supabase" button.');
+    }
+    
+    try {
+      const data = await DatabaseService.getPurchases();
+      
+      const mappedPurchases = data.map(purchase => ({
+        id: purchase.id,
+        productName: purchase.product_name,
+        category: purchase.category,
+        supplierId: purchase.supplier_id,
+        quantity: purchase.quantity,
+        unit: purchase.unit,
+        purchasePricePerUnit: purchase.purchase_price_per_unit,
+        totalPurchaseCost: purchase.total_purchase_cost,
+        purchaseDate: purchase.purchase_date,
+        invoiceNumber: purchase.invoice_number,
+        notes: purchase.notes,
+        createdBy: purchase.created_by,
+        createdAt: purchase.created_at,
+        updatedAt: purchase.updated_at,
+        supplier: purchase.supplier
+      }));
+      
+      console.log('Purchases loaded from database:', mappedPurchases);
+      setPurchases(mappedPurchases);
+    } catch (error) {
       console.warn('Purchases table not available:', error);
       setPurchases([]); // Set empty array instead of error
-    const data = await DatabaseService.getPurchases();
-    
-    const mappedPurchases = data.map(purchase => ({
-      id: purchase.id,
-      productName: purchase.product_name,
-      category: purchase.category,
-      supplierId: purchase.supplier_id,
-      quantity: purchase.quantity,
-      unit: purchase.unit,
-      purchasePricePerUnit: purchase.purchase_price_per_unit,
-      totalPurchaseCost: purchase.total_purchase_cost,
-      purchaseDate: purchase.purchase_date,
-      invoiceNumber: purchase.invoice_number,
-      notes: purchase.notes,
-      createdBy: purchase.created_by,
-      createdAt: purchase.created_at,
-      updatedAt: purchase.updated_at,
-      supplier: purchase.supplier
-    }));
-    
-    console.log('Purchases loaded from database:', mappedPurchases);
-    setPurchases(mappedPurchases);
+    }
     updateLastUpdated();
   };
 
@@ -447,30 +452,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     if (!DatabaseService.isConnected()) {
       throw new Error('Supabase not configured. Please click "Connect to Supabase" button.');
+    }
+    
+    try {
+      const data = await DatabaseService.getSales();
+      
+      const mappedSales = data.map(sale => ({
+        id: sale.id,
+        productName: sale.product_name,
+        category: sale.category,
+        quantity: sale.quantity,
+        unit: sale.unit,
+        salePricePerUnit: sale.sale_price_per_unit,
+        totalSaleAmount: sale.total_sale_amount,
+        saleDate: sale.sale_date,
+        customerName: sale.customer_name,
+        customerPhone: sale.customer_phone,
+        paymentMethod: sale.payment_method,
+        notes: sale.notes,
+        createdBy: sale.created_by,
+        createdAt: sale.created_at,
+        updatedAt: sale.updated_at
+      }));
+      
+      console.log('Sales loaded from database:', mappedSales);
+      setSales(mappedSales);
+    } catch (error) {
       console.warn('Sales table not available:', error);
       setSales([]); // Set empty array instead of error
-    const data = await DatabaseService.getSales();
-    
-    const mappedSales = data.map(sale => ({
-      id: sale.id,
-      productName: sale.product_name,
-      category: sale.category,
-      quantity: sale.quantity,
-      unit: sale.unit,
-      salePricePerUnit: sale.sale_price_per_unit,
-      totalSaleAmount: sale.total_sale_amount,
-      saleDate: sale.sale_date,
-      customerName: sale.customer_name,
-      customerPhone: sale.customer_phone,
-      paymentMethod: sale.payment_method,
-      notes: sale.notes,
-      createdBy: sale.created_by,
-      createdAt: sale.created_at,
-      updatedAt: sale.updated_at
-    }));
-    
-    console.log('Sales loaded from database:', mappedSales);
-    setSales(mappedSales);
+    }
     updateLastUpdated();
   };
 
