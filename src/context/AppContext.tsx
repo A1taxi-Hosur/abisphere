@@ -415,8 +415,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     if (!DatabaseService.isConnected()) {
       throw new Error('Supabase not configured. Please click "Connect to Supabase" button.');
-    }
-    
+      console.warn('Purchases table not available:', error);
+      setPurchases([]); // Set empty array instead of error
     const data = await DatabaseService.getPurchases();
     
     const mappedPurchases = data.map(purchase => ({
@@ -447,8 +447,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     if (!DatabaseService.isConnected()) {
       throw new Error('Supabase not configured. Please click "Connect to Supabase" button.');
-    }
-    
+      console.warn('Sales table not available:', error);
+      setSales([]); // Set empty array instead of error
     const data = await DatabaseService.getSales();
     
     const mappedSales = data.map(sale => ({
