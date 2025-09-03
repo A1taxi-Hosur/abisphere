@@ -1628,8 +1628,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       staffMembers,
       purchases,
       sales,
-      purchases,
-      sales,
       updateInventoryItem,
       addInventoryItem,
       deleteInventoryItem,
