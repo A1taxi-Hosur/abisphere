@@ -483,3 +483,115 @@ export const updateCustomer = async (id: string, data: any) => {
     }
   }
 };
+
+// Purchases
+export const getPurchases = async () => {
+  if (API_MODE === 'supabase') {
+    return await DatabaseService.getPurchases();
+  } else {
+    try {
+      const response = await apiClient.get('/api/purchases');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching purchases:', error);
+      throw error;
+    }
+  }
+};
+
+export const createPurchase = async (data: any) => {
+  if (API_MODE === 'supabase') {
+    return await DatabaseService.addPurchase(data);
+  } else {
+    try {
+      const response = await apiClient.post('/api/purchases', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating purchase:', error);
+      throw error;
+    }
+  }
+};
+
+export const updatePurchase = async (id: string, data: any) => {
+  if (API_MODE === 'supabase') {
+    return await DatabaseService.updatePurchase(id, data);
+  } else {
+    try {
+      const response = await apiClient.put(`/api/purchases/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating purchase:', error);
+      throw error;
+    }
+  }
+};
+
+export const deletePurchase = async (id: string) => {
+  if (API_MODE === 'supabase') {
+    return await DatabaseService.deletePurchase(id);
+  } else {
+    try {
+      await apiClient.delete(`/api/purchases/${id}`);
+    } catch (error) {
+      console.error('Error deleting purchase:', error);
+      throw error;
+    }
+  }
+};
+
+// Sales
+export const getSales = async () => {
+  if (API_MODE === 'supabase') {
+    return await DatabaseService.getSales();
+  } else {
+    try {
+      const response = await apiClient.get('/api/sales');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching sales:', error);
+      throw error;
+    }
+  }
+};
+
+export const createSale = async (data: any) => {
+  if (API_MODE === 'supabase') {
+    return await DatabaseService.addSale(data);
+  } else {
+    try {
+      const response = await apiClient.post('/api/sales', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating sale:', error);
+      throw error;
+    }
+  }
+};
+
+export const updateSale = async (id: string, data: any) => {
+  if (API_MODE === 'supabase') {
+    return await DatabaseService.updateSale(id, data);
+  } else {
+    try {
+      const response = await apiClient.put(`/api/sales/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating sale:', error);
+      throw error;
+    }
+  }
+};
+
+export const deleteSale = async (id: string) => {
+  if (API_MODE === 'supabase') {
+    return await DatabaseService.deleteSale(id);
+  } else {
+    try {
+      await apiClient.delete(`/api/sales/${id}`);
+    } catch (error) {
+      console.error('Error deleting sale:', error);
+      throw error;
+    }
+  }
+};

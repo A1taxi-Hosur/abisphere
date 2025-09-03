@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { InventoryItem, Recipe, Order, User, Supplier, PurchaseOrder, PayrollRecord, StockMovement } from '../types';
+import { InventoryItem, Recipe, Order, User, Supplier, PurchaseOrder, PayrollRecord, StockMovement, Purchase, Sale } from '../types';
 import { DatabaseService, subscribeToTable, supabase } from '../lib/supabaseClient';
 import * as dataClient from '../lib/dataClient';
 import { mockInventoryItems } from '../data/mockData';
@@ -15,6 +15,8 @@ interface AppContextType {
   stockMovements: StockMovement[];
   deliveryConfirmations: any[];
   staffMembers: any[];
+  purchases: Purchase[];
+  sales: Sale[];
   
   // Staff Actions
   addStaffMember: (staffData: any) => Promise<{ success: boolean; data: any }>;
@@ -42,6 +44,16 @@ interface AppContextType {
   
   // Delivery Actions
   getDeliveryConfirmation: (orderId: string) => any | null;
+  
+  // Purchase Actions
+  addPurchase: (purchase: Omit<Purchase, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updatePurchase: (id: string, updates: Partial<Purchase>) => Promise<void>;
+  deletePurchase: (id: string) => Promise<void>;
+  
+  // Sales Actions
+  addSale: (sale: Omit<Sale, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateSale: (id: string, updates: Partial<Sale>) => Promise<void>;
+  deleteSale: (id: string) => Promise<void>;
   
   // Notifications
   notifications: Notification[];
@@ -77,6 +89,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [deliveryConfirmations, setDeliveryConfirmations] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [staffMembers, setStaffMembers] = useState<any[]>([]);
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
   const [lastUpdated, setLastUpdated] = useState(new Date().toISOString());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -296,6 +310,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         loadStockMovementsData(),
         loadDeliveryConfirmationsData(),
         loadStaffMembersData()
+        loadPurchasesData(),
+        loadSalesData()
       ]);
       
       console.log('✅ All data loaded from database successfully');
@@ -391,6 +407,70 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     console.log('Staff members loaded from database:', data);
     setStaffMembers(data);
+    updateLastUpdated();
+  };
+
+  const loadPurchasesData = async () => {
+    console.log('Loading purchases from database...');
+    
+    if (!DatabaseService.isConnected()) {
+      throw new Error('Supabase not configured. Please click "Connect to Supabase" button.');
+    }
+    
+    const data = await DatabaseService.getPurchases();
+    
+    const mappedPurchases = data.map(purchase => ({
+      id: purchase.id,
+      productName: purchase.product_name,
+      category: purchase.category,
+      supplierId: purchase.supplier_id,
+      quantity: purchase.quantity,
+      unit: purchase.unit,
+      purchasePricePerUnit: purchase.purchase_price_per_unit,
+      totalPurchaseCost: purchase.total_purchase_cost,
+      purchaseDate: purchase.purchase_date,
+      invoiceNumber: purchase.invoice_number,
+      notes: purchase.notes,
+      createdBy: purchase.created_by,
+      createdAt: purchase.created_at,
+      updatedAt: purchase.updated_at,
+      supplier: purchase.supplier
+    }));
+    
+    console.log('Purchases loaded from database:', mappedPurchases);
+    setPurchases(mappedPurchases);
+    updateLastUpdated();
+  };
+
+  const loadSalesData = async () => {
+    console.log('Loading sales from database...');
+    
+    if (!DatabaseService.isConnected()) {
+      throw new Error('Supabase not configured. Please click "Connect to Supabase" button.');
+    }
+    
+    const data = await DatabaseService.getSales();
+    
+    const mappedSales = data.map(sale => ({
+      id: sale.id,
+      productName: sale.product_name,
+      category: sale.category,
+      quantity: sale.quantity,
+      unit: sale.unit,
+      salePricePerUnit: sale.sale_price_per_unit,
+      totalSaleAmount: sale.total_sale_amount,
+      saleDate: sale.sale_date,
+      customerName: sale.customer_name,
+      customerPhone: sale.customer_phone,
+      paymentMethod: sale.payment_method,
+      notes: sale.notes,
+      createdBy: sale.created_by,
+      createdAt: sale.created_at,
+      updatedAt: sale.updated_at
+    }));
+    
+    console.log('Sales loaded from database:', mappedSales);
+    setSales(mappedSales);
     updateLastUpdated();
   };
 
@@ -1273,6 +1353,268 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return deliveryConfirmations.find(dc => dc.order_id === orderId) || null;
   };
 
+  // Purchase Actions
+  const addPurchase = async (purchase: Omit<Purchase, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      console.log('Adding purchase to database:', purchase);
+      
+      const dbPurchase = {
+        product_name: purchase.productName,
+        category: purchase.category,
+        supplier_id: purchase.supplierId || null,
+        quantity: purchase.quantity,
+        unit: purchase.unit,
+        purchase_price_per_unit: purchase.purchasePricePerUnit,
+        total_purchase_cost: purchase.totalPurchaseCost,
+        purchase_date: purchase.purchaseDate,
+        invoice_number: purchase.invoiceNumber || null,
+        notes: purchase.notes || '',
+        created_by: purchase.createdBy
+      };
+
+      const data = await DatabaseService.addPurchase(dbPurchase);
+
+      const newPurchase: Purchase = {
+        id: data.id,
+        productName: data.product_name,
+        category: data.category,
+        supplierId: data.supplier_id,
+        quantity: data.quantity,
+        unit: data.unit,
+        purchasePricePerUnit: data.purchase_price_per_unit,
+        totalPurchaseCost: data.total_purchase_cost,
+        purchaseDate: data.purchase_date,
+        invoiceNumber: data.invoice_number,
+        notes: data.notes,
+        createdBy: data.created_by,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        supplier: data.supplier
+      };
+      
+      setPurchases(prev => [newPurchase, ...prev]);
+      updateLastUpdated();
+      
+      addNotification({
+        type: 'success',
+        title: 'Purchase Recorded',
+        message: `Purchase of ${purchase.quantity} ${purchase.unit} ${purchase.productName} recorded successfully`
+      });
+      
+    } catch (err) {
+      console.error('Error adding purchase:', err);
+      addNotification({
+        type: 'error',
+        title: 'Purchase Failed',
+        message: 'Failed to record purchase: ' + (err as Error).message
+      });
+      throw err;
+    }
+  };
+
+  const updatePurchase = async (id: string, updates: Partial<Purchase>) => {
+    try {
+      const dbUpdates = {
+        product_name: updates.productName,
+        category: updates.category,
+        supplier_id: updates.supplierId,
+        quantity: updates.quantity,
+        unit: updates.unit,
+        purchase_price_per_unit: updates.purchasePricePerUnit,
+        total_purchase_cost: updates.totalPurchaseCost,
+        purchase_date: updates.purchaseDate,
+        invoice_number: updates.invoiceNumber,
+        notes: updates.notes,
+        updated_at: new Date().toISOString()
+      };
+
+      // Remove undefined values
+      Object.keys(dbUpdates).forEach(key => {
+        if (dbUpdates[key as keyof typeof dbUpdates] === undefined) {
+          delete dbUpdates[key as keyof typeof dbUpdates];
+        }
+      });
+
+      await DatabaseService.updatePurchase(id, dbUpdates);
+
+      setPurchases(prev => 
+        prev.map(purchase => purchase.id === id ? { ...purchase, ...updates } : purchase)
+      );
+      updateLastUpdated();
+      
+      addNotification({
+        type: 'success',
+        title: 'Purchase Updated',
+        message: 'Purchase record has been updated successfully'
+      });
+    } catch (err) {
+      console.error('Error updating purchase:', err);
+      addNotification({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Failed to update purchase: ' + (err as Error).message
+      });
+      throw err;
+    }
+  };
+
+  const deletePurchase = async (id: string) => {
+    try {
+      const purchase = purchases.find(p => p.id === id);
+      
+      await DatabaseService.deletePurchase(id);
+
+      setPurchases(prev => prev.filter(p => p.id !== id));
+      updateLastUpdated();
+      
+      addNotification({
+        type: 'success',
+        title: 'Purchase Deleted',
+        message: `Purchase record for ${purchase?.productName} has been deleted`
+      });
+    } catch (err) {
+      console.error('Error deleting purchase:', err);
+      addNotification({
+        type: 'error',
+        title: 'Delete Failed',
+        message: 'Failed to delete purchase: ' + (err as Error).message
+      });
+      throw err;
+    }
+  };
+
+  // Sales Actions
+  const addSale = async (sale: Omit<Sale, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      console.log('Adding sale to database:', sale);
+      
+      const dbSale = {
+        product_name: sale.productName,
+        category: sale.category,
+        quantity: sale.quantity,
+        unit: sale.unit,
+        sale_price_per_unit: sale.salePricePerUnit,
+        total_sale_amount: sale.totalSaleAmount,
+        sale_date: sale.saleDate,
+        customer_name: sale.customerName || null,
+        customer_phone: sale.customerPhone || null,
+        payment_method: sale.paymentMethod,
+        notes: sale.notes || '',
+        created_by: sale.createdBy
+      };
+
+      const data = await DatabaseService.addSale(dbSale);
+
+      const newSale: Sale = {
+        id: data.id,
+        productName: data.product_name,
+        category: data.category,
+        quantity: data.quantity,
+        unit: data.unit,
+        salePricePerUnit: data.sale_price_per_unit,
+        totalSaleAmount: data.total_sale_amount,
+        saleDate: data.sale_date,
+        customerName: data.customer_name,
+        customerPhone: data.customer_phone,
+        paymentMethod: data.payment_method,
+        notes: data.notes,
+        createdBy: data.created_by,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      };
+      
+      setSales(prev => [newSale, ...prev]);
+      updateLastUpdated();
+      
+      addNotification({
+        type: 'success',
+        title: 'Sale Recorded',
+        message: `Sale of ${sale.quantity} ${sale.unit} ${sale.productName} recorded successfully`
+      });
+      
+    } catch (err) {
+      console.error('Error adding sale:', err);
+      addNotification({
+        type: 'error',
+        title: 'Sale Failed',
+        message: 'Failed to record sale: ' + (err as Error).message
+      });
+      throw err;
+    }
+  };
+
+  const updateSale = async (id: string, updates: Partial<Sale>) => {
+    try {
+      const dbUpdates = {
+        product_name: updates.productName,
+        category: updates.category,
+        quantity: updates.quantity,
+        unit: updates.unit,
+        sale_price_per_unit: updates.salePricePerUnit,
+        total_sale_amount: updates.totalSaleAmount,
+        sale_date: updates.saleDate,
+        customer_name: updates.customerName,
+        customer_phone: updates.customerPhone,
+        payment_method: updates.paymentMethod,
+        notes: updates.notes,
+        updated_at: new Date().toISOString()
+      };
+
+      // Remove undefined values
+      Object.keys(dbUpdates).forEach(key => {
+        if (dbUpdates[key as keyof typeof dbUpdates] === undefined) {
+          delete dbUpdates[key as keyof typeof dbUpdates];
+        }
+      });
+
+      await DatabaseService.updateSale(id, dbUpdates);
+
+      setSales(prev => 
+        prev.map(sale => sale.id === id ? { ...sale, ...updates } : sale)
+      );
+      updateLastUpdated();
+      
+      addNotification({
+        type: 'success',
+        title: 'Sale Updated',
+        message: 'Sale record has been updated successfully'
+      });
+    } catch (err) {
+      console.error('Error updating sale:', err);
+      addNotification({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Failed to update sale: ' + (err as Error).message
+      });
+      throw err;
+    }
+  };
+
+  const deleteSale = async (id: string) => {
+    try {
+      const sale = sales.find(s => s.id === id);
+      
+      await DatabaseService.deleteSale(id);
+
+      setSales(prev => prev.filter(s => s.id !== id));
+      updateLastUpdated();
+      
+      addNotification({
+        type: 'success',
+        title: 'Sale Deleted',
+        message: `Sale record for ${sale?.productName} has been deleted`
+      });
+    } catch (err) {
+      console.error('Error deleting sale:', err);
+      addNotification({
+        type: 'error',
+        title: 'Delete Failed',
+        message: 'Failed to delete sale: ' + (err as Error).message
+      });
+      throw err;
+    }
+  };
+
   return (
     <AppContext.Provider value={{
       inventoryItems,
@@ -1284,6 +1626,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       stockMovements,
       deliveryConfirmations,
       staffMembers,
+      purchases,
+      sales,
       updateInventoryItem,
       addInventoryItem,
       deleteInventoryItem,
@@ -1297,6 +1641,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateSupplier,
       deleteSupplier,
       getDeliveryConfirmation,
+      addPurchase,
+      updatePurchase,
+      deletePurchase,
+      addSale,
+      updateSale,
+      deleteSale,
       notifications,
       addNotification,
       markNotificationRead,

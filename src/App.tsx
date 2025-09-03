@@ -19,6 +19,7 @@ import { SettingsPanel } from './components/Settings/SettingsPanel';
 import { RecipeManagement } from './components/Recipes/RecipeManagement';
 import { CustomerManagement } from './components/Customers/CustomerManagement';
 import { DeliveryTracking } from './components/Delivery/DeliveryTracking';
+import { PurchaseSalesManagement } from './components/PurchaseSales/PurchaseSalesManagement';
 import { KitchenStaffDashboard } from './components/Dashboard/KitchenStaffDashboard';
 import { InventoryStaffDashboard } from './components/Dashboard/InventoryStaffDashboard';
 import { DeliveryStaffDashboard } from './components/Dashboard/DeliveryStaffDashboard';
@@ -73,6 +74,8 @@ function Dashboard() {
         return <InventoryList />;
       case 'kitchen-inventory':
         return <InventoryUsage />;
+      case 'purchase-sales':
+        return <PurchaseSalesManagement />;
       case 'kitchen':
         return <KitchenDashboard />;
       case 'recipes':

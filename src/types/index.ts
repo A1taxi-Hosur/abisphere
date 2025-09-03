@@ -141,3 +141,43 @@ export interface StockMovement {
   movementDate: string;
   createdAt: string;
 }
+
+export interface Purchase {
+  id: string;
+  productName: string;
+  category: 'vegetables' | 'meat' | 'dairy' | 'spices' | 'grains' | 'other';
+  supplierId?: string;
+  quantity: number;
+  unit: string;
+  purchasePricePerUnit: number;
+  totalPurchaseCost: number;
+  purchaseDate: string;
+  invoiceNumber?: string;
+  notes: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  supplier?: {
+    name: string;
+    contact: string;
+    email: string;
+  };
+}
+
+export interface Sale {
+  id: string;
+  productName: string;
+  category: 'vegetables' | 'meat' | 'dairy' | 'spices' | 'grains' | 'other' | 'prepared_food' | 'beverages';
+  quantity: number;
+  unit: string;
+  salePricePerUnit: number;
+  totalSaleAmount: number;
+  saleDate: string;
+  customerName?: string;
+  customerPhone?: string;
+  paymentMethod: 'cash' | 'card' | 'online' | 'upi';
+  notes: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}

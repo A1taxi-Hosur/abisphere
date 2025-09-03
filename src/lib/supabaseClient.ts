@@ -504,6 +504,149 @@ export class DatabaseService {
     return data;
   }
 
+  // Purchases
+  static async getPurchases() {
+    if (!this.isConnected()) {
+      throw new Error('Supabase not configured - missing environment variables');
+    }
+    
+    try {
+      const { data, error } = await supabase
+        .from('purchases')
+        .select(`
+          *,
+          supplier:suppliers(name, contact, email)
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Supabase purchases query error:', error);
+        throw error;
+      }
+      return data || [];
+    } catch (error) {
+      console.error('Database purchases load failed:', error);
+      throw error;
+    }
+  }
+
+  static async addPurchase(purchase: any) {
+    if (!supabase) {
+      throw new Error('Database not configured');
+    }
+    
+    const { data, error } = await supabase
+      .from('purchases')
+      .insert([purchase])
+      .select(`
+        *,
+        supplier:suppliers(name, contact, email)
+      `)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async updatePurchase(id: string, updates: any) {
+    if (!supabase) {
+      throw new Error('Database not configured');
+    }
+    
+    const { data, error } = await supabase
+      .from('purchases')
+      .update(updates)
+      .eq('id', id)
+      .select(`
+        *,
+        supplier:suppliers(name, contact, email)
+      `)
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async deletePurchase(id: string) {
+    if (!supabase) {
+      throw new Error('Database not configured');
+    }
+    
+    const { error } = await supabase
+      .from('purchases')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  }
+
+  // Sales
+  static async getSales() {
+    if (!this.isConnected()) {
+      throw new Error('Supabase not configured - missing environment variables');
+    }
+    
+    try {
+      const { data, error } = await supabase
+        .from('sales')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Supabase sales query error:', error);
+        throw error;
+      }
+      return data || [];
+    } catch (error) {
+      console.error('Database sales load failed:', error);
+      throw error;
+    }
+  }
+
+  static async addSale(sale: any) {
+    if (!supabase) {
+      throw new Error('Database not configured');
+    }
+    
+    const { data, error } = await supabase
+      .from('sales')
+      .insert([sale])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async updateSale(id: string, updates: any) {
+    if (!supabase) {
+      throw new Error('Database not configured');
+    }
+    
+    const { data, error } = await supabase
+      .from('sales')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  }
+
+  static async deleteSale(id: string) {
+    if (!supabase) {
+      throw new Error('Database not configured');
+    }
+    
+    const { error } = await supabase
+      .from('sales')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+  }
+
   // Customers
   static async getCustomers() {
     if (!this.isConnected()) {
